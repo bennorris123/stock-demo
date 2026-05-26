@@ -1,0 +1,235 @@
+:root {
+  --bg: #0b0e14;
+  --panel: #131823;
+  --panel-2: #1a2030;
+  --text: #e6e9ef;
+  --muted: #8a93a6;
+  --up: #22c55e;
+  --down: #ef4444;
+  --accent: #6366f1;
+  --border: #232a3b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif;
+  min-height: 100vh;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 28px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, #0f1320 0%, #0b0e14 100%);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: 0.3px;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.controls input {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 8px;
+  outline: none;
+  font-size: 14px;
+  width: 220px;
+}
+
+.controls input:focus {
+  border-color: var(--accent);
+}
+
+.controls button {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.controls button:hover {
+  filter: brightness(1.1);
+}
+
+.status {
+  color: var(--muted);
+  font-size: 13px;
+  min-width: 140px;
+  text-align: right;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  padding: 20px 28px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  position: relative;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  border-color: #2e364c;
+}
+
+.card .top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.card .symbol {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.card .name {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.card .remove {
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0 4px;
+}
+
+.card .remove:hover {
+  color: var(--down);
+}
+
+.card .price {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 6px 0 2px 0;
+}
+
+.card .change {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.up {
+  color: var(--up);
+}
+
+.down {
+  color: var(--down);
+}
+
+.card .chart-wrap {
+  margin-top: 12px;
+  height: 80px;
+}
+
+.card .meta {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 12px;
+}
+
+.card .meta div {
+  background: var(--panel-2);
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.card .meta .label {
+  color: var(--muted);
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.card.error {
+  border-color: var(--down);
+}
+
+.card.error .price {
+  color: var(--down);
+  font-size: 14px;
+}
+
+.card.loading {
+  opacity: 0.6;
+}
+
+.flash-up {
+  animation: flashUp 0.6s ease;
+}
+
+.flash-down {
+  animation: flashDown 0.6s ease;
+}
+
+@keyframes flashUp {
+  0% {
+    background: rgba(34, 197, 94, 0.25);
+  }
+  100% {
+    background: var(--panel);
+  }
+}
+
+@keyframes flashDown {
+  0% {
+    background: rgba(239, 68, 68, 0.25);
+  }
+  100% {
+    background: var(--panel);
+  }
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  color: var(--muted);
+  font-size: 12px;
+  border-top: 1px solid var(--border);
+}

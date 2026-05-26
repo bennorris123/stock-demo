@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Live Stocks Dashboard</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  </head>
+  <body>
+    <header>
+      <h1>📈 Live Stocks</h1>
+      <div class="controls">
+        <input
+          id="symbol-input"
+          type="text"
+          placeholder="Add symbol (e.g. NVDA)"
+          autocomplete="off"
+        />
+        <button id="add-btn">Add</button>
+        <span id="status" class="status">Loading…</span>
+      </div>
+    </header>
+
+    <main id="grid" class="grid"></main>
+
+    <footer>
+      <span>Data: Stooq (no API key). Intraday change is vs today's open. Refreshes every 10s.</span>
+    </footer>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
