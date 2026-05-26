@@ -105,6 +105,7 @@ header h1 {
 .card:hover {
   transform: translateY(-2px);
   border-color: #2e364c;
+  cursor: pointer;
 }
 
 .card .top {
@@ -232,4 +233,127 @@ footer {
   color: var(--muted);
   font-size: 12px;
   border-top: 1px solid var(--border);
+}
+
+/* --- Modal --- */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 8, 14, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+.modal-panel {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: min(820px, 92vw);
+  max-height: 90vh;
+  overflow: auto;
+  padding: 24px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 8px;
+}
+
+.modal-close:hover {
+  color: var(--text);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 20px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.modal-symbol {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.modal-name {
+  color: var(--muted);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.modal-price-block {
+  text-align: right;
+}
+
+.modal-price {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.modal-change {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.modal-chart-wrap {
+  height: 320px;
+  margin-bottom: 20px;
+  background: var(--panel-2);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.modal-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  font-size: 13px;
+}
+
+@media (max-width: 560px) {
+  .modal-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.modal-stats > div {
+  background: var(--panel-2);
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.modal-stats .label {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
 }

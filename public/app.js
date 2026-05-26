@@ -7,7 +7,9 @@ const statusEl = document.getElementById('status');
 const input = document.getElementById('symbol-input');
 const addBtn = document.getElementById('add-btn');
 
-const cards = new Map(); // symbol -> { el, chart, lastPrice }
+const cards = new Map(); // symbol -> { el, chart, lastPrice, lastData }
+let openModalSymbol = null;
+let modalChart = null;
 
 function loadSymbols() {
   try {
@@ -63,7 +65,11 @@ function makeCard(symbol) {
       <div><span class="label">Volume</span><span class="vol">—</span></div>
     </div>
   `;
-  el.querySelector('.remove').addEventListener('click', () => removeCard(symbol));
+  el.querySelector('.remove').addEventListener('click', (e) => {
+    e.stopPropagation();
+    removeCard(symbol);
+  });
+  el.addEventListener('click', () => openModal(symbol));
 
   const ctx = el.querySelector('canvas').getContext('2d');
   const chart = new Chart(ctx, {
@@ -96,7 +102,7 @@ function makeCard(symbol) {
   });
 
   grid.appendChild(el);
-  cards.set(symbol, { el, chart, lastPrice: null });
+  cards.set(symbol, { el, chart, lastPrice: null, lastData: null });
 }
 
 function removeCard(symbol) {
@@ -158,6 +164,9 @@ function updateCard(symbol, data) {
     c.el.classList.add(cls);
   }
   c.lastPrice = data.price;
+  c.lastData = data;
+
+  if (openModalSymbol === symbol) renderModal(data);
 }
 
 async function fetchSymbol(symbol) {
@@ -201,6 +210,98 @@ input.addEventListener('keydown', (e) => {
     addSymbol(input.value);
     input.value = '';
   }
+});
+
+// --- Modal ---
+
+const modal = document.getElementById('modal');
+
+function openModal(symbol) {
+  openModalSymbol = symbol;
+  modal.classList.remove('hidden');
+  modal.setAttribute('aria-hidden', 'false');
+
+  if (!modalChart) {
+    const ctx = document.getElementById('m-chart').getContext('2d');
+    modalChart = new Chart(ctx, {
+      type: 'line',
+      data: { labels: [], datasets: [{ data: [], borderWidth: 2, fill: true, tension: 0.25, pointRadius: 0 }] },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: {
+            type: 'linear',
+            ticks: {
+              color: '#8a93a6',
+              maxTicksLimit: 6,
+              callback: (v) => new Date(v).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            },
+            grid: { color: '#232a3b' },
+          },
+          y: {
+            ticks: { color: '#8a93a6' },
+            grid: { color: '#232a3b' },
+          },
+        },
+      },
+    });
+  }
+
+  const c = cards.get(symbol);
+  if (c?.lastData) renderModal(c.lastData);
+  else {
+    document.getElementById('m-symbol').textContent = symbol;
+    document.getElementById('m-name').textContent = 'Loading…';
+  }
+}
+
+function closeModal() {
+  openModalSymbol = null;
+  modal.classList.add('hidden');
+  modal.setAttribute('aria-hidden', 'true');
+}
+
+function renderModal(data) {
+  const isUp = data.change >= 0;
+  const arrow = isUp ? '▲' : '▼';
+
+  document.getElementById('m-symbol').textContent = data.symbol;
+  document.getElementById('m-name').textContent = data.name;
+  document.getElementById('m-price').textContent = fmtPrice(data.price, data.currency);
+
+  const changeEl = document.getElementById('m-change');
+  changeEl.className = `modal-change ${isUp ? 'up' : 'down'}`;
+  changeEl.textContent = `${arrow} ${fmtPrice(Math.abs(data.change), data.currency)} (${data.changePct.toFixed(2)}%)`;
+
+  document.getElementById('m-open').textContent = fmtPrice(data.open, data.currency);
+  document.getElementById('m-high').textContent = fmtPrice(data.dayHigh, data.currency);
+  document.getElementById('m-low').textContent = fmtPrice(data.dayLow, data.currency);
+  const rangePct = data.open ? ((data.dayHigh - data.dayLow) / data.open) * 100 : 0;
+  document.getElementById('m-range').textContent = `${rangePct.toFixed(2)}%`;
+  document.getElementById('m-vol').textContent = fmtVolume(data.volume);
+  document.getElementById('m-samples').textContent = String(data.series.length);
+  document.getElementById('m-first').textContent = data.series.length
+    ? new Date(data.series[0].t).toLocaleTimeString()
+    : '—';
+  document.getElementById('m-updated').textContent = new Date(data.fetchedAt).toLocaleTimeString();
+
+  modalChart.data.labels = data.series.map((p) => p.t);
+  modalChart.data.datasets[0].data = data.series.map((p) => p.c);
+  modalChart.data.datasets[0].borderColor = isUp ? '#22c55e' : '#ef4444';
+  modalChart.data.datasets[0].backgroundColor = isUp
+    ? 'rgba(34, 197, 94, 0.15)'
+    : 'rgba(239, 68, 68, 0.15)';
+  modalChart.update('none');
+}
+
+modal.addEventListener('click', (e) => {
+  if (e.target.dataset.close !== undefined) closeModal();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && openModalSymbol) closeModal();
 });
 
 // boot

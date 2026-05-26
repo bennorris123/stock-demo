@@ -24,6 +24,36 @@
 
     <main id="grid" class="grid"></main>
 
+    <div id="modal" class="modal hidden" aria-hidden="true">
+      <div class="modal-backdrop" data-close></div>
+      <div class="modal-panel" role="dialog" aria-modal="true">
+        <button class="modal-close" data-close aria-label="Close">×</button>
+        <div class="modal-header">
+          <div>
+            <div id="m-symbol" class="modal-symbol">—</div>
+            <div id="m-name" class="modal-name">—</div>
+          </div>
+          <div class="modal-price-block">
+            <div id="m-price" class="modal-price">—</div>
+            <div id="m-change" class="modal-change">—</div>
+          </div>
+        </div>
+        <div class="modal-chart-wrap">
+          <canvas id="m-chart"></canvas>
+        </div>
+        <div class="modal-stats">
+          <div><span class="label">Open</span><span id="m-open">—</span></div>
+          <div><span class="label">Day High</span><span id="m-high">—</span></div>
+          <div><span class="label">Day Low</span><span id="m-low">—</span></div>
+          <div><span class="label">Day Range %</span><span id="m-range">—</span></div>
+          <div><span class="label">Volume</span><span id="m-vol">—</span></div>
+          <div><span class="label">Samples</span><span id="m-samples">—</span></div>
+          <div><span class="label">First sample</span><span id="m-first">—</span></div>
+          <div><span class="label">Updated</span><span id="m-updated">—</span></div>
+        </div>
+      </div>
+    </div>
+
     <footer>
       <span>Data: Stooq (no API key). Intraday change is vs today's open. Refreshes every 10s.</span>
     </footer>
