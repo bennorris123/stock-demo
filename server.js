@@ -10,6 +10,15 @@ const STOOQ_HEADERS = {
   Accept: 'text/csv,text/plain,*/*',
 };
 
+// Upstream resilience: cap how long we wait on Stooq, and cache each parsed row
+// briefly. The dashboard polls every ~10s, so without a cache a handful of open
+// tabs translates into a burst of identical upstream requests; a slow upstream
+// would also tie up a request per poll. The rolling history below is still
+// updated on every request, so sparklines keep accumulating at the poll rate.
+const UPSTREAM_TIMEOUT_MS = 5000;
+const ROW_CACHE_TTL_MS = 5000;
+const rowCache = new Map(); // stooq symbol -> { expires, row }
+
 // In-memory rolling history per symbol so the sparkline accumulates
 // as the dashboard polls. Resets on server restart.
 const HISTORY_LIMIT = 240; // ~40min at 10s polling
@@ -23,6 +32,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 function toStooqSymbol(input) {
   const s = input.toLowerCase().trim();
   return s.includes('.') ? s : `${s}.us`;
+}
+
+// Ticker characters only, so we never interpolate arbitrary input into the
+// upstream URL or the history keys.
+function isValidSymbol(s) {
+  return /^[A-Z0-9][A-Z0-9.:_-]{0,15}$/.test(s);
 }
 
 function parseCsv(text) {
@@ -51,22 +66,52 @@ function pushHistory(symbol, t, c) {
   return arr;
 }
 
-app.get('/api/quote/:symbol', async (req, res) => {
-  const requested = req.params.symbol.toUpperCase();
-  const stooqSym = toStooqSymbol(requested);
+async function fetchRow(stooqSym) {
+  const cached = rowCache.get(stooqSym);
+  if (cached && cached.expires > Date.now()) return cached.row;
+
   const url = `https://stooq.com/q/l/?s=${encodeURIComponent(
     stooqSym
   )}&f=sd2t2ohlcvn&h&e=csv`;
 
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS);
   try {
-    const upstream = await fetch(url, { headers: STOOQ_HEADERS });
+    const upstream = await fetch(url, {
+      headers: STOOQ_HEADERS,
+      signal: controller.signal,
+    });
     if (!upstream.ok) {
-      return res
-        .status(upstream.status)
-        .json({ error: `Stooq responded ${upstream.status}` });
+      const err = new Error(`Stooq responded ${upstream.status}`);
+      err.status = upstream.status;
+      throw err;
     }
-    const text = await upstream.text();
-    const row = parseCsv(text);
+    const row = parseCsv(await upstream.text());
+    rowCache.set(stooqSym, { expires: Date.now() + ROW_CACHE_TTL_MS, row });
+    return row;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+app.get('/api/health', (req, res) => {
+  res.json({
+    ok: true,
+    trackedSymbols: history.size,
+    uptimeSeconds: Math.round(process.uptime()),
+  });
+});
+
+app.get('/api/quote/:symbol', async (req, res) => {
+  const requested = req.params.symbol.toUpperCase().trim();
+  if (!isValidSymbol(requested)) {
+    return res.status(400).json({ error: `Invalid symbol: ${requested}` });
+  }
+
+  const stooqSym = toStooqSymbol(requested);
+
+  try {
+    const row = await fetchRow(stooqSym);
     if (!row || row.Close === 'N/D' || !row.Close) {
       return res.status(404).json({ error: `No data for ${requested}` });
     }
@@ -101,7 +146,10 @@ app.get('/api/quote/:symbol', async (req, res) => {
       fetchedAt: Date.now(),
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    if (err.name === 'AbortError') {
+      return res.status(504).json({ error: 'Upstream timed out' });
+    }
+    res.status(err.status || 500).json({ error: err.message });
   }
 });
 

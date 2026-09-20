@@ -1,7 +1,7 @@
 {
   "name": "stocks-dashboard",
   "version": "1.0.0",
-  "description": "Live stock dashboard using Yahoo Finance (no API key required)",
+  "description": "Live stock dashboard using Stooq (no API key required)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
