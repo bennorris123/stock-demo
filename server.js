@@ -105,6 +105,16 @@ app.get('/api/quote/:symbol', async (req, res) => {
   }
 });
 
+// Cheap liveness check: the process is up and how many symbols the rolling
+// history is currently tracking.
+app.get('/api/health', (req, res) => {
+  res.json({
+    ok: true,
+    trackedSymbols: history.size,
+    uptimeSeconds: Math.round(process.uptime()),
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Stocks dashboard running at http://localhost:${PORT}`);
 });
