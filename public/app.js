@@ -196,6 +196,16 @@ addBtn.addEventListener('click', () => {
   input.focus();
 });
 
+const refreshBtn = document.getElementById('refresh-btn');
+refreshBtn.addEventListener('click', async () => {
+  refreshBtn.disabled = true;
+  try {
+    await refreshAll();
+  } finally {
+    refreshBtn.disabled = false;
+  }
+});
+
 input.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
     addSymbol(input.value);
