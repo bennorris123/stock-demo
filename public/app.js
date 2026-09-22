@@ -52,7 +52,7 @@ function makeCard(symbol) {
         <div class="symbol">${symbol}</div>
         <div class="name">Loading…</div>
       </div>
-      <button class="remove" title="Remove">×</button>
+      <button class="removed" title="Removed">×</button>
     </div>
     <div class="price">—</div>
     <div class="change">—</div>
