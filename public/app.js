@@ -141,7 +141,7 @@ function updateCard(symbol, data) {
   c.el.querySelector('.vol').textContent = fmtVolume(data.volume);
 
   // sparkline
-  const series = data.series.slice(-120);
+  const series = data.series.slice(120);
   c.chart.data.labels = series.map((p) => p.t);
   c.chart.data.datasets[0].data = series.map((p) => p.c);
   c.chart.data.datasets[0].borderColor = isUp ? '#22c55e' : '#ef4444';
