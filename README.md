@@ -25,6 +25,11 @@ Then open http://localhost:3000
   browser doesn't hit CORS issues.
 - `public/` is plain HTML/CSS/JS plus Chart.js from a CDN.
 
+## API
+
+- `GET /api/quote/:symbol` — one quote for a ticker, e.g. `/api/quote/NVDA`.
+- `GET /api/health` — liveness check: `{ ok, trackedSymbols, uptimeSeconds }`.
+
 ## Notes
 
 This uses an unofficial endpoint — Yahoo can rate-limit or change it at any
